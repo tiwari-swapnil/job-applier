@@ -1,0 +1,43 @@
+spring:
+  application:
+    name: job-mailer
+
+  datasource:
+    url: jdbc:mysql://localhost:3306/job_applier
+    username: ${DB_USERNAME:root}
+    password: ${DB_PASSWORD:YOUR_LOCAL_MYSQL_PASSWORD}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: true
+
+  thymeleaf:
+    cache: false
+
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ${GMAIL_EMAILID:abc@gmail.com}
+    password: ${GMAIL_APP_PASSWORD:abcdefghijkl}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+          connectiontimeout: ${TIMEOUT:30000}
+          timeout: ${TIMEOUT:30000}
+          writetimeout: ${TIMEOUT:30000}
+
+  servlet:
+    multipart:
+      max-file-size: ${MAX_FILE_SIZE:5MB}
+      max-request-size: ${MAX_REQUEST_SIZE:10MB}
+
+server:
+  port: ${PORT:8080}

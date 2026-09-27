@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+
+    <title>Send Email - Job Mailer</title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background: #f5f7fb;
+            color: #222;
+        }
+
+        .navbar {
+            height: 65px;
+            background: #1f2937;
+            color: white;
+            display: flex;
+            align-items: center;
+            padding: 0 40px;
+        }
+
+        .navbar a {
+            color: white;
+            text-decoration: none;
+            margin-left: auto;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 35px auto;
+            padding: 0 20px;
+        }
+
+        h1 {
+            margin-bottom: 25px;
+        }
+
+        .card {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 3px 12px rgba(0,0,0,0.08);
+            margin-bottom: 25px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 7px;
+        }
+
+        select,
+        input[type="file"] {
+            width: 100%;
+            padding: 11px;
+            border: 1px solid #d1d5db;
+            border-radius: 7px;
+            background: white;
+        }
+
+        .preview {
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 15px;
+        }
+
+        .preview-row {
+            margin-bottom: 15px;
+        }
+
+        .preview-label {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .preview-body {
+            white-space: pre-wrap;
+            line-height: 1.6;
+        }
+
+        .btn {
+            padding: 12px 22px;
+            border: none;
+            border-radius: 7px;
+            background: #2563eb;
+            color: white;
+            cursor: pointer;
+            font-size: 15px;
+        }
+
+        .btn:hover {
+            background: #1d4ed8;
+        }
+
+        .btn:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+        }
+
+        .success {
+            color: #15803d;
+            font-weight: bold;
+            margin-top: 15px;
+        }
+
+        .error {
+            color: #dc2626;
+            font-weight: bold;
+            margin-top: 15px;
+        }
+
+        .info {
+            background: #eff6ff;
+            color: #1e40af;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+    </style>
+
+</head>
+
+
+<nav class="navbar">
+
+    <strong>📧 Job Mailer</strong>
+
+    <a href="/">← Dashboard</a>
+
+</nav>
+
+
+<div class="container">
+
+    <h1>📤 Send Job / Referral Email</h1>
+
+
+    <div class="card">
+
+        <div class="info">
+
+            Select a contact, choose an email template,
+            upload your resume and preview the personalized email
+            before sending.
+
+        </div>
+
+
+        <!-- Contact -->
+
+        <div class="form-group">
+
+            <label>1. Select Contact</label>
+
+            <select id="contactSelect">
+
+                <option value="">
+                    Loading contacts...
+                </option>
+
+            </select>
+
+        </div>
+
+
+        <!-- Template -->
+
+        <div class="form-group">
+
+            <label>2. Select Email Template</label>
+
+            <select id="templateSelect">
+
+                <option value="">
+                    Loading templates...
+                </option>
+
+            </select>
+
+        </div>
+
+
+        <!-- Resume -->
+
+        <div class="form-group">
+
+            <label>3. Upload Resume</label>
+
+            <input
+                    type="file"
+                    id="resumeFile"
+                    accept=".pdf,application/pdf">
+
+        </div>
+
+
+        <!-- Preview -->
+
+        <h2>4. Email Preview</h2>
+
+        <div class="preview">
+
+            <div class="preview-row">
+
+                <div class="preview-label">
+                    To:
+                </div>
+
+                <div id="previewTo">
+                    -
+                </div>
+
+            </div>
+
+
+            <div class="preview-row">
+
+                <div class="preview-label">
+                    Subject:
+                </div>
+
+                <div id="previewSubject">
+                    -
+                </div>
+
+            </div>
+
+
+            <div class="preview-row">
+
+                <div class="preview-label">
+                    Message:
+                </div>
+
+                <div
+                        id="previewBody"
+                        class="preview-body">
+                    Select a contact and template.
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <br>
+
+
+        <button
+                id="sendButton"
+                class="btn">
+
+            📤 Send Email
+
+        </button>
+
+
+        <div id="message"></div>
+
+    </div>
+
+</div>
+
+
+<script>
+
+
+    let contacts = [];
+
+    let templates = [];
+
+
+    const contactSelect =
+        document.getElementById("contactSelect");
+
+    const templateSelect =
+        document.getElementById("templateSelect");
+
+    const resumeFile =
+        document.getElementById("resumeFile");
+
+    const sendButton =
+        document.getElementById("sendButton");
+
+    const message =
+        document.getElementById("message");
+
+
+    const previewTo =
+        document.getElementById("previewTo");
+
+    const previewSubject =
+        document.getElementById("previewSubject");
+
+    const previewBody =
+        document.getElementById("previewBody");
+
+
+    // =========================
+    // LOAD CONTACTS
+    // =========================
+
+    async function loadContacts() {
+
+        try {
+
+            const response =
+                await fetch("/api/contacts");
+
+            contacts =
+                await response.json();
+
+
+            contactSelect.innerHTML =
+                '<option value="">Select Contact</option>';
+
+
+            contacts.forEach(contact => {
+
+                const option =
+                    document.createElement("option");
+
+                option.value =
+                    contact.id;
+
+                option.textContent =
+                    `${contact.name} - ${contact.company || "No Company"}`;
+
+                contactSelect.appendChild(option);
+
+            });
+
+        }
+
+        catch (error) {
+
+            contactSelect.innerHTML =
+                '<option value="">Failed to load contacts</option>';
+
+        }
+
+    }
+
+
+    // =========================
+    // LOAD TEMPLATES
+    // =========================
+
+    async function loadTemplates() {
+
+        try {
+
+            const response =
+                await fetch("/api/templates");
+
+            templates =
+                await response.json();
+
+
+            templateSelect.innerHTML =
+                '<option value="">Select Template</option>';
+
+
+            templates.forEach(template => {
+
+                const option =
+                    document.createElement("option");
+
+                option.value =
+                    template.id;
+
+                option.textContent =
+                    template.name;
+
+                templateSelect.appendChild(option);
+
+            });
+
+        }
+
+        catch (error) {
+
+            templateSelect.innerHTML =
+                '<option value="">Failed to load templates</option>';
+
+        }
+
+    }
+
+
+    // =========================
+    // PERSONALIZATION
+    // =========================
+
+    function personalize(text, contact) {
+
+        return text
+
+            .replaceAll(
+                "{Name}",
+                contact.name || ""
+            )
+
+            .replaceAll(
+                "{Company}",
+                contact.company || ""
+            )
+
+            .replaceAll(
+                "{Position}",
+                contact.position || ""
+            );
+
+    }
+
+
+    // =========================
+    // UPDATE PREVIEW
+    // =========================
+
+    function updatePreview() {
+
+        const contactId =
+            contactSelect.value;
+
+        const templateId =
+            templateSelect.value;
+
+
+        const contact =
+            contacts.find(
+                c => c.id == contactId
+            );
+
+        const template =
+            templates.find(
+                t => t.id == templateId
+            );
+
+
+        if (!contact || !template) {
+
+            previewTo.textContent = "-";
+
+            previewSubject.textContent = "-";
+
+            previewBody.textContent =
+                "Select a contact and template.";
+
+            return;
+
+        }
+
+
+        previewTo.textContent =
+            contact.email;
+
+
+        previewSubject.textContent =
+            personalize(
+                template.subject,
+                contact
+            );
+
+
+        previewBody.textContent =
+            personalize(
+                template.body,
+                contact
+            );
+
+    }
+
+
+    contactSelect.addEventListener(
+        "change",
+        updatePreview
+    );
+
+
+    templateSelect.addEventListener(
+        "change",
+        updatePreview
+    );
+
+
+    // =========================
+    // SEND EMAIL
+    // =========================
+
+    sendButton.addEventListener(
+        "click",
+        async function () {
+
+            message.textContent = "";
+            message.className = "";
+
+
+            const contactId =
+                contactSelect.value;
+
+            const templateId =
+                templateSelect.value;
+
+            const file =
+                resumeFile.files[0];
+
+
+            // Validation
+
+            if (!contactId) {
+
+                message.textContent =
+                    "Please select a contact.";
+
+                message.className = "error";
+
+                return;
+
+            }
+
+
+            if (!templateId) {
+
+                message.textContent =
+                    "Please select a template.";
+
+                message.className = "error";
+
+                return;
+
+            }
+
+
+            if (!file) {
+
+                message.textContent =
+                    "Please select your resume PDF.";
+
+                message.className = "error";
+
+                return;
+
+            }
+
+
+            if (
+                !file.name
+                    .toLowerCase()
+                    .endsWith(".pdf")
+            ) {
+
+                message.textContent =
+                    "Only PDF files are allowed.";
+
+                message.className = "error";
+
+                return;
+
+            }
+
+
+            // Create multipart form
+
+            const formData =
+                new FormData();
+
+
+            formData.append(
+                "contactId",
+                contactId
+            );
+
+
+            formData.append(
+                "templateId",
+                templateId
+            );
+
+
+            formData.append(
+                "file",
+                file
+            );
+
+
+            sendButton.disabled = true;
+
+            sendButton.textContent =
+                "Sending...";
+
+
+            try {
+
+                const response =
+                    await fetch(
+                        "/api/email/send",
+                        {
+                            method: "POST",
+                            body: formData
+                        }
+                    );
+
+
+                const result =
+                    await response.text();
+
+
+                if (!response.ok) {
+
+                    throw new Error(result);
+
+                }
+
+
+                message.textContent =
+                    "✅ Email sent successfully with resume!";
+
+                message.className =
+                    "success";
+
+
+                // Reset resume
+
+                resumeFile.value = "";
+
+
+                // Reload contacts so status becomes SENT
+
+                await loadContacts();
+
+
+            }
+
+            catch (error) {
+
+                message.textContent =
+                    "❌ " + error.message;
+
+                message.className =
+                    "error";
+
+            }
+
+            finally {
+
+                sendButton.disabled = false;
+
+                sendButton.textContent =
+                    "📤 Send Email";
+
+            }
+
+        }
+    );
+
+
+    // =========================
+    // INITIAL LOAD
+    // =========================
+
+    loadContacts();
+
+    loadTemplates();
+
+
+</script>
+
+
+</body>
+
+</html>

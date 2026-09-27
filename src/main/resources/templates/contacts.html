@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+
+    <title>Contacts - Job Mailer</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background: #f5f7fb;
+            color: #222;
+        }
+
+        .navbar {
+            height: 65px;
+            background: #1f2937;
+            color: white;
+            display: flex;
+            align-items: center;
+            padding: 0 40px;
+        }
+
+        .navbar a {
+            color: white;
+            text-decoration: none;
+            margin-left: auto;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 35px auto;
+            padding: 0 20px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .header h1 {
+            font-size: 28px;
+        }
+
+        .form-card,
+        .table-card {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 3px 12px rgba(0,0,0,0.08);
+            margin-bottom: 25px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        input,
+        select {
+            width: 100%;
+            padding: 11px;
+            border: 1px solid #d1d5db;
+            border-radius: 7px;
+            margin-top: 6px;
+        }
+
+        label {
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .full {
+            grid-column: span 2;
+        }
+
+        button {
+            padding: 11px 20px;
+            background: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 7px;
+            cursor: pointer;
+            margin-top: 15px;
+        }
+
+        button:hover {
+            background: #1d4ed8;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        th,
+        td {
+            padding: 13px 10px;
+            border-bottom: 1px solid #eee;
+            text-align: left;
+        }
+
+        th {
+            background: #f9fafb;
+        }
+
+        .delete-btn {
+            background: #dc2626;
+            padding: 7px 12px;
+            margin: 0;
+        }
+
+        .delete-btn:hover {
+            background: #b91c1c;
+        }
+
+        .message {
+            margin-top: 15px;
+            font-weight: bold;
+        }
+
+        @media (max-width: 700px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .full {
+                grid-column: span 1;
+            }
+
+            .table-card {
+                overflow-x: auto;
+            }
+        }
+    </style>
+</head>
+
+
+<nav class="navbar">
+
+    <strong>📧 Job Mailer</strong>
+    <a href="/">← Dashboard</a>
+</nav>
+
+<div class="container">
+
+    <div class="header">
+        <h1>👤 Contacts</h1>
+    </div>
+
+    <!-- Add Contact -->
+    <div class="form-card">
+
+        <h2>Add Contact</h2>
+        <br>
+
+        <form id="contactForm">
+
+            <div class="form-grid">
+
+                <div>
+                    <label>Name</label>
+                    <input
+                            type="text"
+                            id="name"
+                            placeholder="Rahul Sharma"
+                            required>
+                </div>
+
+                <div>
+                    <label>Email</label>
+                    <input
+                            type="email"
+                            id="email"
+                            placeholder="rahul@example.com"
+                            required>
+                </div>
+
+                <div>
+                    <label>Company</label>
+                    <input
+                            type="text"
+                            id="company"
+                            placeholder="Google">
+                </div>
+
+                <div>
+                    <label>Position</label>
+                    <input
+                            type="text"
+                            id="position"
+                            placeholder="Software Engineer">
+                </div>
+
+                <div class="full">
+                    <label>Contact Type</label>
+
+                    <select id="type">
+                        <option value="REFERRAL">Referral</option>
+                        <option value="RECRUITER">Recruiter</option>
+                        <option value="HR">HR</option>
+                        <option value="EMPLOYEE">Employee</option>
+                        <option value="OTHER">Other</option>
+                    </select>
+                </div>
+
+            </div>
+
+            <button type="submit">Add Contact</button>
+
+        </form>
+
+        <div id="message" class="message"></div>
+
+    </div>
+
+
+    <!-- Contact List -->
+
+    <div class="table-card">
+
+        <h2>Saved Contacts</h2>
+
+        <table>
+
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Company</th>
+                <th>Position</th>
+                <th>Type</th>
+                <th>Status</th>
+                <th>Action</th>
+            </tr>
+            </thead>
+
+            <tbody id="contactsTable">
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>
+
+
+<script>
+
+    const form = document.getElementById("contactForm");
+    const table = document.getElementById("contactsTable");
+    const message = document.getElementById("message");
+
+
+    // Load contacts
+    async function loadContacts() {
+
+        try {
+
+            const response =
+                await fetch("/api/contacts");
+
+            const contacts =
+                await response.json();
+
+            table.innerHTML = "";
+
+            contacts.forEach(contact => {
+
+                const row = document.createElement("tr");
+
+                row.innerHTML = `
+                    <td>${contact.id}</td>
+                    <td>${contact.name}</td>
+                    <td>${contact.email}</td>
+                    <td>${contact.company || ""}</td>
+                    <td>${contact.position || ""}</td>
+                    <td>${contact.type || ""}</td>
+                    <td>${contact.status || "NOT_SENT"}</td>
+
+                    <td>
+                        <button
+                            class="delete-btn"
+                            onclick="deleteContact(${contact.id})">
+                            Delete
+                        </button>
+                    </td>
+                `;
+
+                table.appendChild(row);
+            });
+
+        } catch (error) {
+
+            message.textContent =
+                "Failed to load contacts.";
+
+        }
+    }
+
+
+    // Add contact
+    form.addEventListener("submit", async function(event) {
+
+        event.preventDefault();
+
+        const contact = {
+
+            name: document.getElementById("name").value,
+
+            email: document.getElementById("email").value,
+
+            company: document.getElementById("company").value,
+
+            position: document.getElementById("position").value,
+
+            type: document.getElementById("type").value
+
+        };
+
+
+        try {
+
+            const response = await fetch(
+                "/api/contacts",
+                {
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+
+                    body: JSON.stringify(contact)
+                }
+            );
+
+
+            if (!response.ok) {
+
+                throw new Error("Failed");
+
+            }
+
+
+            message.textContent =
+                "Contact added successfully!";
+
+            message.style.color = "green";
+
+            form.reset();
+
+            loadContacts();
+
+        } catch (error) {
+
+            message.textContent =
+                "Failed to add contact.";
+
+            message.style.color = "red";
+
+        }
+
+    });
+
+
+    // Delete contact
+    async function deleteContact(id) {
+
+        if (!confirm("Delete this contact?")) {
+            return;
+        }
+
+
+        try {
+
+            const response = await fetch(
+                `/api/contacts/${id}`,
+                {
+                    method: "DELETE"
+                }
+            );
+
+
+            if (response.ok) {
+
+                loadContacts();
+
+            } else {
+
+                alert("Failed to delete contact.");
+
+            }
+
+        } catch (error) {
+
+            alert("Something went wrong.");
+
+        }
+
+    }
+
+
+    // Load contacts when page opens
+    loadContacts();
+
+</script>
+
+</body>
+</html>

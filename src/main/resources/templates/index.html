@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Job Mailer</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background: #f5f7fb;
+            color: #222;
+        }
+
+        .navbar {
+            height: 65px;
+            background: #1f2937;
+            color: white;
+            display: flex;
+            align-items: center;
+            padding: 0 40px;
+        }
+
+        .navbar h2 {
+            font-size: 22px;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        .welcome {
+            margin-bottom: 30px;
+        }
+
+        .welcome h1 {
+            font-size: 30px;
+            margin-bottom: 8px;
+        }
+
+        .welcome p {
+            color: #666;
+        }
+
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin-bottom: 35px;
+        }
+
+        .card {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 3px 12px rgba(0,0,0,0.08);
+        }
+
+        .card h3 {
+            margin-bottom: 10px;
+        }
+
+        .card p {
+            color: #666;
+            margin-bottom: 20px;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 10px 18px;
+            background: #2563eb;
+            color: white;
+            text-decoration: none;
+            border-radius: 7px;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn:hover {
+            background: #1d4ed8;
+        }
+
+        .section {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 3px 12px rgba(0,0,0,0.08);
+        }
+
+        .section h2 {
+            margin-bottom: 15px;
+        }
+
+        @media (max-width: 800px) {
+            .cards {
+                grid-template-columns: 1fr;
+            }
+        }
+
+
+        /*.stats-container {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .stat-card {
+            background: #ffffff;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        .stat-card h3 {
+            margin-bottom: 10px;
+        }
+
+        .stat-card p {
+            font-size: 32px;
+            font-weight: bold;
+            margin: 0;
+        }*/
+
+        .stats-container {
+            display: grid !important;
+            grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+            gap: 30px;
+            width: 100%;
+            margin: 30px 0;
+        }
+
+        .stat-card {
+            width: 100%;
+            /*height: 230px;*/
+            height: 100px;
+            box-sizing: border-box;
+
+            background: #ffffff;
+            border-radius: 18px;
+            /*padding: 25px;*/
+            padding: 10px;
+
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+
+            text-align: center;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+        }
+
+        .stat-card h3 {
+            margin: 0 0 15px 0;
+            /*font-size: 26px;*/
+            font-size: 16px;
+        }
+
+        .stat-card p {
+            margin: 0;
+            /*font-size: 42px;*/
+            font-size: 26px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<script>
+    async function loadDashboardStats() {
+        try {
+            const response = await fetch('/api/dashboard/stats');
+            const stats = await response.json();
+
+            document.getElementById('totalContacts').textContent =
+                stats.totalContacts;
+
+            document.getElementById('emailsSent').textContent =
+                stats.emailsSent;
+
+            document.getElementById('notSent').textContent =
+                stats.notSent;
+
+            document.getElementById('totalTemplates').textContent =
+                stats.totalTemplates;
+
+        } catch (error) {
+            console.error("Failed to load dashboard stats:", error);
+        }
+    }
+
+    loadDashboardStats();
+</script>
+
+
+
+<nav class="navbar">
+
+    <h2>📧 Job Mailer</h2>
+</nav>
+
+<div class="container">
+
+    <div class="welcome">
+        <h1>Job & Referral Mailer</h1>
+        <p>Manage your contacts, templates and send personalized job outreach emails.</p>
+    </div>
+
+    <div class="cards">
+
+        <div class="card">
+            <h3>👤 Contacts</h3>
+            <p>Add and manage recruiters, employees and referral contacts.</p>
+            <a href="/contacts" class="btn">Manage Contacts</a>
+        </div>
+
+        <div class="card">
+            <h3>📝 Templates</h3>
+            <p>Create reusable email templates with personalization.</p>
+            <a href="/templates" class="btn">Manage Templates</a>
+        </div>
+
+        <div class="card">
+            <h3>📤 Send Email</h3>
+            <p>Select a contact, template and resume to send your email.</p>
+            <a href="/send-email" class="btn">Send Email</a>
+        </div>
+
+        <div class="card">
+            <h3>📜 History</h3>
+            <p>View all emails you have sent.</p>
+            <a href="/history" class="btn">View Emails Sent</a>
+        </div>
+
+        <!--<div class="card" onclick="window.location.href='/history'">
+            <h2>📜 History</h2>
+            <p>View all emails you have sent.</p>
+        </div>-->
+
+    </div>
+
+    <div class="stats-container">
+
+        <div class="stat-card">
+            <h3>👥 Total Contacts</h3>
+            <p id="totalContacts">0</p>
+        </div>
+
+        <div class="stat-card">
+            <h3>📤 Emails Sent</h3>
+            <p id="emailsSent">0</p>
+        </div>
+
+        <div class="stat-card">
+            <h3>⏳ Not Sent</h3>
+            <p id="notSent">0</p>
+        </div>
+
+        <div class="stat-card">
+            <h3>📝 Templates</h3>
+            <p id="totalTemplates">0</p>
+        </div>
+
+    </div>
+
+    <div class="section">
+        <h2>🚀 How it works</h2>
+
+        <p>1. Add your recruiter or referral contacts.</p>
+        <br>
+
+        <p>2. Create an email template using variables like
+            <b>{Name}</b>, <b>{Company}</b> and <b>{Position}</b>.
+        </p>
+        <br>
+
+        <p>3. Select a contact and template.</p>
+        <br>
+
+        <p>4. Upload your resume PDF.</p>
+        <br>
+
+        <p>5. Send the personalized email.</p>
+    </div>
+
+
+</div>
+
+</body>
+</html>
